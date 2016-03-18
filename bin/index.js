@@ -12,14 +12,15 @@ EReg.prototype = {
 	__class__: EReg
 };
 var MainServer = function() {
+	this.userNumber = 0;
 	var expressApp = new js_npm_Express();
-	var server = js_node_Http.createServer(expressApp);
-	this.socketIO = new js_npm_socketio_Server(server);
+	var httpServer = js_node_Http.createServer(expressApp);
+	this.socketServer = new js_npm_socketio_Server(httpServer);
 	expressApp.get("/",$bind(this,this.sendIndex));
 	expressApp.get("/client.js",$bind(this,this.sendClientJS));
-	this.socketIO.on("connection",$bind(this,this.onConnection));
+	this.socketServer.on("connection",$bind(this,this.onConnection));
 	console.log("Listening on port " + MainServer.PORT);
-	server.listen(MainServer.PORT);
+	httpServer.listen(MainServer.PORT);
 };
 MainServer.__name__ = true;
 MainServer.main = function() {
@@ -33,11 +34,24 @@ MainServer.prototype = {
 		response.sendfile("client.js");
 	}
 	,onConnection: function(socket) {
+		this.userNumber++;
+		this.onConnect(socket);
 		socket.on("chat message",$bind(this,this.onChatMessage));
+		socket.on("disconnect",$bind(this,this.onDisconnect));
+	}
+	,onConnect: function(socket) {
+		var connectMessage = "User " + this.userNumber + " connected.";
+		console.log(connectMessage);
+		this.socketServer.emit("user connected",connectMessage);
+	}
+	,onDisconnect: function(socket) {
+		var disconnectMessage = "A User disconnected.";
+		console.log(disconnectMessage);
+		this.socketServer.emit("user disconnected",disconnectMessage);
 	}
 	,onChatMessage: function(message) {
 		console.log("onChatMessage " + message);
-		this.socketIO.emit("chat message",message);
+		this.socketServer.emit("chat message",message);
 	}
 	,__class__: MainServer
 };

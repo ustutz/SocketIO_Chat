@@ -8,6 +8,8 @@ function $extend(from, fields) {
 var MainClient = function() {
 	this.socket = new io("http://localhost:3000");
 	this.socket.on("chat message",$bind(this,this.onMessage));
+	this.socket.on("user connected",$bind(this,this.onConnect));
+	this.socket.on("user disconnected",$bind(this,this.onDisconnect));
 	this.messages = window.document.getElementById("messages");
 	this.inputField = js_Boot.__cast(window.document.getElementById("input_field") , HTMLInputElement);
 	this.sendButton = window.document.getElementById("send_button");
@@ -23,11 +25,20 @@ MainClient.prototype = {
 		this.inputField.value = "";
 		return false;
 	}
+	,onConnect: function(message) {
+		this.appendChatLine(message);
+	}
+	,onDisconnect: function(message) {
+		this.appendChatLine(message);
+	}
 	,onMessage: function(message) {
+		this.appendChatLine(message);
+	}
+	,appendChatLine: function(text) {
 		var li;
 		var _this = window.document;
 		li = _this.createElement("li");
-		li.innerHTML = message;
+		li.innerHTML = text;
 		this.messages.appendChild(li);
 	}
 	,__class__: MainClient

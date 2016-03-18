@@ -26,6 +26,8 @@ class MainClient {
 		
 		socket = new Client( "http://localhost:3000" );
 		socket.on( "chat message", onMessage );
+		socket.on( "user connected", onConnect );
+		socket.on( "user disconnected", onDisconnect );
 		
 		messages = Browser.document.getElementById( "messages" );
 		inputField = cast( Browser.document.getElementById( "input_field" ), InputElement );
@@ -40,9 +42,23 @@ class MainClient {
 		return false;
 	}
 	
+	function onConnect( message:String ):Void { //trace( "onConnect" );
+		appendChatLine( message );
+	}
+	
+	function onDisconnect( message:String ):Void {
+		appendChatLine( message );
+	}
+	
 	function onMessage( message:String ):Void { //trace( "onMessage" );
+		appendChatLine( message );
+	}
+	
+	function appendChatLine( text:String ):Void {
+		
 		var li = Browser.document.createLIElement();
-		li.innerHTML = message;
+		li.innerHTML = text;
 		messages.appendChild( li );
 	}
+	
 }
